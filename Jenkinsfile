@@ -2,18 +2,14 @@ pipeline {
     agent any
 
     environment {
-        GIT_REPO        = "https://github.com/veeravenkateswararao/react.git"
-        GIT_BRANCH      = "main"
+        GIT_REPO = "https://github.com/veeravenkateswararao/react.git"
+        GIT_BRANCH = "main"
 
-        DOCKERHUB_USER  = "venkyveera"
-        IMAGE_NAME      = "react-app"
-        IMAGE_TAG       = "${BUILD_NUMBER}"
+        DOCKERHUB_USER = "venkyveera"
+        IMAGE_NAME = "react-app"
+        IMAGE_TAG = "${BUILD_NUMBER}"
 
-        DOCKER_CREDS    = "Docker_CRED"
-
-        CONTAINER_NAME  = "react-container"
-        HOST_PORT       = "9676"
-        CONTAINER_PORT  = "80"
+        DOCKER_CREDS = "Docker_CRED"
     }
 
     stages {
@@ -61,16 +57,13 @@ pipeline {
             }
         }
 
-        stage('Deploy Container') {
+        stage('Deploy to Kubernetes') {
             steps {
                 sh """
-                docker stop ${CONTAINER_NAME} || true
-                docker rm ${CONTAINER_NAME} || true
+                kubectl set image deployment/venky-react-deploy \
+                venky-react-cont=${DOCKERHUB_USER}/${IMAGE_NAME}:${IMAGE_TAG}
 
-                docker run -d \
-                -p ${HOST_PORT}:${CONTAINER_PORT} \
-                --name ${CONTAINER_NAME} \
-                ${DOCKERHUB_USER}/${IMAGE_NAME}:${IMAGE_TAG}
+                kubectl rollout status deployment/venky-react-deploy
                 """
             }
         }
