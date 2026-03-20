@@ -44,7 +44,6 @@ pipeline {
                     usernameVariable: 'DOCKER_USER',
                     passwordVariable: 'DOCKER_PASS'
                 )]) {
-
                     sh """
                     echo \$DOCKER_PASS | docker login -u \$DOCKER_USER --password-stdin
                     """
@@ -64,7 +63,7 @@ pipeline {
             steps {
                 sh """
                 aws eks --region ${AWS_REGION} update-kubeconfig --name ${EKS_CLUSTER}
-                kubectl config current-context
+                kubectl get nodes
                 """
             }
         }
@@ -72,7 +71,8 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 sh """
-                kubectl apply -f k8s/
+                kubectl apply -f k8s/deployment.yml
+                kubectl apply -f k8s/service.yml
 
                 kubectl set image deployment/venky-react-deploy \
                 venky-react-cont=${DOCKERHUB_USER}/${IMAGE_NAME}:${IMAGE_TAG}
@@ -82,5 +82,13 @@ pipeline {
             }
         }
 
+        stage('Verify Deployment') {
+            steps {
+                sh """
+                kubectl get pods -o wide
+                kubectl get svc
+                """
+            }
+        }
     }
 }
