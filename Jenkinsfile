@@ -60,6 +60,7 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 sh """
+                kubectl apply -f k8s/
                 kubectl set image deployment/venky-react-deploy \
                 venky-react-cont=${DOCKERHUB_USER}/${IMAGE_NAME}:${IMAGE_TAG}
 
