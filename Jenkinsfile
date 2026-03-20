@@ -10,6 +10,9 @@ pipeline {
         IMAGE_TAG = "${BUILD_NUMBER}"
 
         DOCKER_CREDS = "Docker_CRED"
+
+        AWS_REGION = "eu-north-1"
+        EKS_CLUSTER = "nareshcluster"
     }
 
     stages {
@@ -57,10 +60,20 @@ pipeline {
             }
         }
 
+        stage('Configure EKS Access') {
+            steps {
+                sh """
+                aws eks --region ${AWS_REGION} update-kubeconfig --name ${EKS_CLUSTER}
+                kubectl config current-context
+                """
+            }
+        }
+
         stage('Deploy to Kubernetes') {
             steps {
                 sh """
                 kubectl apply -f k8s/
+
                 kubectl set image deployment/venky-react-deploy \
                 venky-react-cont=${DOCKERHUB_USER}/${IMAGE_NAME}:${IMAGE_TAG}
 
@@ -68,5 +81,6 @@ pipeline {
                 """
             }
         }
+
     }
 }
