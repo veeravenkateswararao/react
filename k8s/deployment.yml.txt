@@ -1,1 +1,22 @@
-sfsf
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: venky-react-deploy
+  labels:
+    app: venky-react
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: venky-react
+  template:
+    metadata:
+      labels:
+        app: venky-react
+    spec:
+      containers:
+      - name: venky-react-cont
+        image: venkyveera/react-app:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
